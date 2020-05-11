@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { connect } from "react-redux";
 import { addTodo } from "./actions/addTodo";
+import { deleteTodo } from "./actions/deleteTodo";
+import { checkTodo } from "./actions/checkTodo";
 
 class ToDo extends Component {
   state = {
@@ -9,11 +11,28 @@ class ToDo extends Component {
 
   handleSubmit = (e) => {
     e.preventDefault();
-    this.props.addTodo(this.state.value);
+    const singleTodo = {
+      id: new Date(),
+      checked: false,
+      value: this.state.value,
+    };
+    this.props.addTodo(singleTodo);
+
+    this.setState({
+      value: "",
+    });
   };
 
   handleChange = (e) => {
     this.setState({ value: e.target.value });
+  };
+
+  handleDelete = (id) => {
+    this.props.delete(id);
+  };
+
+  handleCheck = (id) => {
+    this.props.checked(id);
   };
 
   render() {
@@ -23,9 +42,21 @@ class ToDo extends Component {
           <input value={this.state.value} onChange={this.handleChange} />
           <button type="submit">Add</button>
         </form>
-        {this.props.toDos.map((todo) => {
-          return <p>{todo}</p>;
-        })}
+
+        <div>
+          {this.props.todos.map((todo) => {
+            return (
+              <form onSubmit={() => this.handleDelete(todo.id)}>
+                <p>{todo.value}</p>
+                <input
+                  type="checkbox"
+                  onChange={() => this.handleCheck(todo.id)}
+                />
+                <button>Delete</button>
+              </form>
+            );
+          })}
+        </div>
       </>
     );
   }
@@ -34,13 +65,15 @@ class ToDo extends Component {
 const mapStateToProps = (state) => {
   console.log(state);
   return {
-    toDos: state.toDos,
+    todos: state.toDos,
   };
 };
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = (dispach) => {
   return {
-    addTodo: (todo) => dispatch(addTodo(todo)),
+    addTodo: (todo) => dispach(addTodo(todo)),
+    delete: (id) => dispach(deleteTodo(id)),
+    checked: (id) => dispach(checkTodo(id)),
   };
 };
 
